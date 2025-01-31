@@ -1,0 +1,35 @@
+{
+    "name": "python",
+    "dockerComposeFile": "docker-compose.yaml",
+    "service": "workspace",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "mhutchie.git-graph",
+                "charliermarsh.ruff",
+                "ms-toolsai.jupyter",
+                "DavidAnson.vscode-markdownlint",
+                "ms-azuretools.vscode-docker"
+            ],
+            "settings": {
+                "extensions.verifySignature": false,
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll.rull": "explicit",
+                        "source.organizeImports.ruff": "explicit"
+                    },
+                    "editor.formatOnSave": true
+                },
+                "files.insertFinalNewline": true,
+                "[markdown]": {
+                    "editor.formatOnSave": true,
+                    "editor.formatOnPaste": true,
+                    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+                }
+            }
+        }
+    },
+    "postCreateCommand": "chmod +x .devcontainer/postCreateCommand.sh && .devcontainer/postCreateCommand.sh"
+}
