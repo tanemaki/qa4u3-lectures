@@ -26,6 +26,8 @@ def my_task3(
     N (int): 変数の数
     seed (int | None): 乱数のシード
     """
+    import time
+
     import numpy as np
     import openjij as oj
 
@@ -47,7 +49,10 @@ def my_task3(
     else:
         raise ValueError(f"Invalid sampler name: {sampler_name}")
 
+    start_time = time.time()
     sampleset = sampler.sample_qubo(QUBO, num_reads=num_reads, num_sweeps=num_sweeps)
+    elapsed_time = time.time() - start_time
+    unit_elapsed_time = elapsed_time / num_sweeps
 
     print(sampleset)
 
@@ -55,11 +60,13 @@ def my_task3(
     # print(sampleset.record)  # 重要な情報だけ取り出す
 
     ene = sampleset.data_vectors["energy"]
-    print(ene)
+
+    print(f"Elapsed time: {elapsed_time:.3f} sec")
+    print(f"Elapsed time per sweep: {unit_elapsed_time:.6f} sec")
 
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots()
     ax.hist(ene, bins=20)
-    ax.set_xlim(ene.min(), ene.min() + 20)
+    ax.set_xlim(ene.min(), ene.min() + 10)
     fig.savefig("outputs/lecture01/hist.png")
