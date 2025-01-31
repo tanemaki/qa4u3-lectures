@@ -87,6 +87,7 @@ def my_task4(
     """
 
     import dimod
+    import matplotlib.pyplot as plt
     import numpy as np
     import openjij as oj
 
@@ -97,13 +98,8 @@ def my_task4(
         for j in range(N):
             Jmat[i, j] = -1 / (2 * N)
 
-    print(Jmat)
-
     model = dimod.BinaryQuadraticModel(hvec, Jmat, 0.0, vartype=dimod.SPIN)
     qubo, offset = model.to_qubo()
-
-    print(qubo)
-    print(offset)
 
     if sampler_name == "ojsa":
         sampler = oj.SASampler()
@@ -112,10 +108,38 @@ def my_task4(
     else:
         raise ValueError(f"Invalid sampler name: {sampler_name}")
 
-    sampleset = sampler.sample_qubo(
-        qubo, beta_max=beta_max, num_reads=num_reads, num_sweeps=num_sweeps
-    )
+    beta_list = np.linspace(0.1, 2.0, 20)
+    mag_list = []
+    var_list = []
 
-    print(sampleset)
+    for beta in beta_list:
+        sampleset = sampler.sample_qubo(
+            qubo, beta_max=beta, num_reads=num_reads, num_sweeps=num_sweeps
+        )
 
-    print(sampleset.record)
+        m2_list = []
+        # ひとつひとつ調べよう
+        for k in range(num_reads):
+            binary = sampleset.record[k][0]
+            spin = 2 * binary - 1
+            # m2 = spin.mean() ** 2  # 業界的には2乗でやる。でも、絶対値でも全然良い。
+            m2 = np.abs(spin.mean())
+            # プラスで揃っても、マイナスで揃っても、同じなので二乗する
+            m2_list.append(m2)
+
+        m2_array = np.array(m2_list)
+        print(f"beta={beta:.3f}, mean={m2_array.mean():.3f}, std={m2_array.std():.3f}")
+
+        # magnetization
+        mag_list.append(m2_array.mean())
+        var_list.append(m2_array.std())
+
+    print(mag_list)
+    print(var_list)
+
+    fig, ax = plt.subplots()
+    ax.plot(beta_list, mag_list, label="magnetization")
+    ax.set_xlabel("beta")
+    ax.set_ylabel("magnetization")
+    ax.legend()
+    fig.savefig("outputs/lecture01/magnetization.png")
