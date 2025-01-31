@@ -14,11 +14,20 @@ def my_task2(ctx):
 
 
 @invoke.task
-def my_task3(ctx, N: int = 50, seed: int | None = None):
+def my_task3(
+    ctx,
+    N: int = 50,
+    seed: int | None = None,
+    num_reads: int = 100,
+    num_sweeps: int = 1000,
+    sampler_name: str = "ojsa",
+):
     """
     N (int): 変数の数
+    seed (int | None): 乱数のシード
     """
     import numpy as np
+    import openjij as oj
 
     if seed is not None:
         seed = int(seed)
@@ -30,3 +39,27 @@ def my_task3(ctx, N: int = 50, seed: int | None = None):
     QUBO = (QUBO + QUBO.T) / 2
 
     print(QUBO)
+
+    if sampler_name == "ojsa":
+        sampler = oj.SASampler()
+    elif sampler_name == "ojsqa":
+        sampler = oj.SQASampler()
+    else:
+        raise ValueError(f"Invalid sampler name: {sampler_name}")
+
+    sampleset = sampler.sample_qubo(QUBO, num_reads=num_reads, num_sweeps=num_sweeps)
+
+    print(sampleset)
+
+    # OpenJijの仕様で、同じ結果が入っていても、num_occurrences（num_oc.）が1になっている
+    # print(sampleset.record)  # 重要な情報だけ取り出す
+
+    ene = sampleset.data_vectors["energy"]
+    print(ene)
+
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    ax.hist(ene, bins=20)
+    ax.set_xlim(ene.min(), ene.min() + 20)
+    fig.savefig("outputs/lecture01/hist.png")

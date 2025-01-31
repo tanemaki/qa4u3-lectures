@@ -6,5 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "invoke>=2.2.0",
+    "matplotlib>=3.10.0",
     "openjij>=0.9.2",
 ]
