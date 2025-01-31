@@ -70,3 +70,52 @@ def my_task3(
     ax.hist(ene, bins=20)
     ax.set_xlim(ene.min(), ene.min() + 10)
     fig.savefig("outputs/lecture01/hist.png")
+
+
+@invoke.task
+def my_task4(
+    ctx,
+    N: int = 50,
+    seed: int | None = None,
+    num_reads: int = 1,
+    num_sweeps: int = 1000,
+    sampler_name: str = "ojsa",
+    beta_max: float = 1.0,
+):
+    """
+    キュリー・ワイスモデルのハミルトニアンを作成する。
+    """
+
+    import dimod
+    import numpy as np
+    import openjij as oj
+
+    Jmat = np.zeros([N, N])
+    hvec = np.zeros(N)
+
+    for i in range(N):
+        for j in range(N):
+            Jmat[i, j] = -1 / (2 * N)
+
+    print(Jmat)
+
+    model = dimod.BinaryQuadraticModel(hvec, Jmat, 0.0, vartype=dimod.SPIN)
+    qubo, offset = model.to_qubo()
+
+    print(qubo)
+    print(offset)
+
+    if sampler_name == "ojsa":
+        sampler = oj.SASampler()
+    elif sampler_name == "ojsqa":
+        sampler = oj.SQASampler()
+    else:
+        raise ValueError(f"Invalid sampler name: {sampler_name}")
+
+    sampleset = sampler.sample_qubo(
+        qubo, beta_max=beta_max, num_reads=num_reads, num_sweeps=num_sweeps
+    )
+
+    print(sampleset)
+
+    print(sampleset.record)
