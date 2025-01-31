@@ -124,7 +124,7 @@ def my_task4(
 
     beta_list = np.linspace(0.1, 2.0, 20)
     mag_list = []
-    var_list = []
+    std_list = []
 
     for beta in beta_list:
         # current_seed = int(seed) + index if seed is not None else None
@@ -192,14 +192,14 @@ def my_task4(
 
         # magnetization
         mag_list.append(m2_array.mean())
-        var_list.append(m2_array.std())
+        std_list.append(m2_array.std())
 
     print(mag_list)
-    print(var_list)
+    print(std_list)
 
     fig, ax = plt.subplots()
     # ax.plot(beta_list, mag_list, label="magnetization")
-    ax.errorbar(x=beta_list, y=mag_list, yerr=var_list, label="magnetization")
+    ax.errorbar(x=beta_list, y=mag_list, yerr=std_list, label="magnetization")
     ax.set_xlabel("beta")
     ax.set_ylabel("magnetization")
     ax.set_title(
