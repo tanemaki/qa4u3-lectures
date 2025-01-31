@@ -13,7 +13,15 @@ def my_task2(ctx):
     print(np.arange(10))
 
 
-@invoke.task
+@invoke.task(
+    help={
+        "N": "変数の数",
+        "seed": "乱数のシード",
+        "num_reads": "読み出し回数（試行回数）",
+        "num_sweeps": "スイープ回数（更新回数）",
+        "sampler_name": "サンプラーの名前 [ojsa, ojsqa]",
+    }
+)
 def my_task3(
     ctx,
     N: int = 50,
@@ -23,8 +31,7 @@ def my_task3(
     sampler_name: str = "ojsa",
 ):
     """
-    N (int): 変数の数
-    seed (int | None): 乱数のシード
+    QUBO行列をランダムに作成し、OpenJijで解く。
     """
     import time
 
@@ -69,10 +76,18 @@ def my_task3(
     fig, ax = plt.subplots()
     ax.hist(ene, bins=20)
     ax.set_xlim(ene.min(), ene.min() + 10)
-    fig.savefig("outputs/lecture01/hist.png")
+    fig.savefig("outputs/lecture01/task3.png")
 
 
-@invoke.task
+@invoke.task(
+    help={
+        "N": "変数の数",
+        "seed": "乱数のシード",
+        "num_reads": "読み出し回数（試行回数）",
+        "num_sweeps": "スイープ回数（更新回数）",
+        "sampler_name": "サンプラーの名前 [ojsa, ojsqa]",
+    }
+)
 def my_task4(
     ctx,
     N: int = 50,
@@ -82,7 +97,7 @@ def my_task4(
     sampler_name: str = "ojsa",
 ):
     """
-    キュリー・ワイスモデルのハミルトニアンを作成する。
+    キュリー・ワイスモデルのハミルトニアンを作成し、OpenJijで解く。
     """
 
     import dimod
@@ -193,4 +208,4 @@ def my_task4(
     ax.legend()
     ax.set_ylim(0, 1)
     fig.subplots_adjust(top=0.85)
-    fig.savefig("outputs/lecture01/magnetization.png")
+    fig.savefig("outputs/lecture01/task4_magnetization.png")
