@@ -80,7 +80,6 @@ def my_task4(
     num_reads: int = 1,
     num_sweeps: int = 1000,
     sampler_name: str = "ojsa",
-    beta_max: float = 1.0,
 ):
     """
     キュリー・ワイスモデルのハミルトニアンを作成する。
@@ -122,8 +121,8 @@ def my_task4(
         for k in range(num_reads):
             binary = sampleset.record[k][0]
             spin = 2 * binary - 1
-            # m2 = spin.mean() ** 2  # 業界的には2乗でやる。でも、絶対値でも全然良い。
-            m2 = np.abs(spin.mean())
+            m2 = spin.mean() ** 2  # 業界的には2乗でやる。でも、絶対値でも全然良い。
+            # m2 = np.abs(spin.mean())
             # プラスで揃っても、マイナスで揃っても、同じなので二乗する
             m2_list.append(m2)
 
@@ -138,8 +137,10 @@ def my_task4(
     print(var_list)
 
     fig, ax = plt.subplots()
-    ax.plot(beta_list, mag_list, label="magnetization")
+    # ax.plot(beta_list, mag_list, label="magnetization")
+    ax.errorbar(x=beta_list, y=mag_list, yerr=var_list, label="magnetization")
     ax.set_xlabel("beta")
     ax.set_ylabel("magnetization")
     ax.legend()
+    ax.set_ylim(0, 1)
     fig.savefig("outputs/lecture01/magnetization.png")
