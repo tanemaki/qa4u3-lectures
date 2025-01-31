@@ -112,19 +112,65 @@ def my_task4(
     var_list = []
 
     for beta in beta_list:
-        sampleset = sampler.sample_qubo(
-            qubo, beta_max=beta, num_reads=num_reads, num_sweeps=num_sweeps
-        )
+        # current_seed = int(seed) + index if seed is not None else None
 
-        m2_list = []
-        # ひとつひとつ調べよう
-        for k in range(num_reads):
-            binary = sampleset.record[k][0]
-            spin = 2 * binary - 1
-            m2 = spin.mean() ** 2  # 業界的には2乗でやる。でも、絶対値でも全然良い。
-            # m2 = np.abs(spin.mean())
-            # プラスで揃っても、マイナスで揃っても、同じなので二乗する
-            m2_list.append(m2)
+        if seed is None:
+            # seedを固定しない場合
+            if sampler_name == "ojsa":
+                sampleset = sampler.sample_qubo(
+                    qubo,
+                    beta_max=beta,
+                    num_reads=num_reads,
+                    num_sweeps=num_sweeps,
+                )
+            elif sampler_name == "ojsqa":
+                sampleset = sampler.sample_qubo(
+                    qubo,
+                    beta=beta,
+                    num_reads=num_reads,
+                    num_sweeps=num_sweeps,
+                )
+            else:
+                raise ValueError(f"Invalid sampler name: {sampler_name}")
+
+            m2_list = []
+            # ひとつひとつ調べよう
+            for k in range(num_reads):
+                binary = sampleset.record[k][0]
+                spin = 2 * binary - 1
+                m2 = spin.mean() ** 2  # 業界的には2乗でやる。でも、絶対値でも全然良い。
+                # m2 = np.abs(spin.mean())
+                # プラスで揃っても、マイナスで揃っても、同じなので二乗する
+                m2_list.append(m2)
+        else:
+            # 再現性を持たせるために、seedを変えていく
+            m2_list = []
+            for current_seed in range(int(seed), int(seed) + num_reads):
+                if sampler_name == "ojsa":
+                    sampleset = sampler.sample_qubo(
+                        qubo,
+                        beta_max=beta,
+                        num_reads=1,
+                        num_sweeps=num_sweeps,
+                        seed=current_seed,
+                    )
+                elif sampler_name == "ojsqa":
+                    sampleset = sampler.sample_qubo(
+                        qubo,
+                        beta=beta,
+                        num_reads=1,
+                        num_sweeps=num_sweeps,
+                        seed=current_seed,
+                    )
+                else:
+                    raise ValueError(f"Invalid sampler name: {sampler_name}")
+
+                binary = sampleset.record[0][0]
+                spin = 2 * binary - 1
+                m2 = spin.mean() ** 2  # 業界的には2乗でやる。でも、絶対値でも全然良い。
+                # m2 = np.abs(spin.mean())
+                # プラスで揃っても、マイナスで揃っても、同じなので二乗する
+                m2_list.append(m2)
 
         m2_array = np.array(m2_list)
         print(f"beta={beta:.3f}, mean={m2_array.mean():.3f}, std={m2_array.std():.3f}")
@@ -141,6 +187,10 @@ def my_task4(
     ax.errorbar(x=beta_list, y=mag_list, yerr=var_list, label="magnetization")
     ax.set_xlabel("beta")
     ax.set_ylabel("magnetization")
+    ax.set_title(
+        f"Curie-Weiss model\nN={N}, num_reads={num_reads}, num_sweeps={num_sweeps}\nsampler={sampler_name}, seed={seed}"
+    )
     ax.legend()
     ax.set_ylim(0, 1)
+    fig.subplots_adjust(top=0.85)
     fig.savefig("outputs/lecture01/magnetization.png")
