@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 import openjij as oj
+import pandas as pd
 import streamlit as st
 
 
@@ -84,7 +85,12 @@ def render_page():
         st.write(f"`{sampler_name = }`")
 
     if st.sidebar.checkbox("QUBO行列を表示する", value=True):
-        st.write(QUBO)
+        # プラスを赤、マイナスを青で表示する
+        st.dataframe(
+            pd.DataFrame(QUBO)
+            .style.format("{:.3f}")
+            .background_gradient(cmap="coolwarm", vmin=-1, vmax=1)
+        )
 
     if sampler_name == "ojsa":
         sampler = oj.SASampler()
