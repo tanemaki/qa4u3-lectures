@@ -11,3 +11,6 @@ wheels/
 
 # Outputs
 *.png
+
+# VS Code
+.vscode/

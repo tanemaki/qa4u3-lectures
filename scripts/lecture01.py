@@ -26,8 +26,8 @@ def my_task3(
     ctx,
     N: int = 50,
     seed: int | None = None,
-    num_reads: int = 100,
-    num_sweeps: int = 1000,
+    num_reads: int | None = None,
+    num_sweeps: int | None = None,
     sampler_name: str = "ojsa",
 ):
     """
@@ -41,6 +41,10 @@ def my_task3(
     if seed is not None:
         seed = int(seed)
         np.random.seed(seed)
+    if num_reads is not None:
+        num_reads = int(num_reads)
+    if num_sweeps is not None:
+        num_sweeps = int(num_sweeps)
 
     # QUBO（Quadratic Unconstraind Binary Optimization）行列の作成
     QUBO = np.random.randn(N, N)
@@ -57,8 +61,14 @@ def my_task3(
         raise ValueError(f"Invalid sampler name: {sampler_name}")
 
     start_time = time.time()
-    sampleset = sampler.sample_qubo(QUBO, num_reads=num_reads, num_sweeps=num_sweeps)
+    sampleset = sampler.sample_qubo(
+        QUBO, num_reads=num_reads, num_sweeps=num_sweeps, seed=seed
+    )
     elapsed_time = time.time() - start_time
+
+    if num_sweeps is None:
+        num_sweeps = sampleset.info["schedule"]["num_sweeps"]
+
     unit_elapsed_time = elapsed_time / num_sweeps
 
     print(sampleset)
@@ -76,7 +86,7 @@ def my_task3(
     fig, ax = plt.subplots()
     ax.hist(ene, bins=20)
     ax.set_xlim(ene.min(), ene.min() + 10)
-    fig.savefig("outputs/lecture01/task3.png")
+    fig.savefig("outputs/lecture01/task3_energy_distribution.png")
 
 
 @invoke.task(
