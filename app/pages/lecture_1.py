@@ -1,5 +1,6 @@
 import time
 
+import matplotlib.pyplot as plt
 import numpy as np
 import openjij as oj
 import pandas as pd
@@ -106,7 +107,17 @@ def render_page():
     # st.write(type(response))
     st.write(f"Elapsed time: {elapsed_time:.3f} [s]")
 
-    st.write("`response.info =`", response.info)
+    # st.write("`response.info =`", response.info)
+
+    fig, ax = plt.subplots()
+    ax.hist(
+        response.energies,
+        bins=np.linspace(response.energies.min(), response.energies.min() + 20, 21),
+    )
+    ax.set_xlabel("Energy")
+    ax.set_ylabel("Frequency")
+    ax.set_xlim(response.energies.min(), response.energies.min() + 20)
+    st.pyplot(fig)
 
 
 if __name__ == "__main__":
