@@ -74,14 +74,17 @@ def render_page():
     num_sweeps = insert_widget_to_get_num_sweeps()
     sampler_name = insert_widget_to_get_sampler_name()
 
-    st.write(f"`{N = }`")
-    st.write(f"`{num_reads = }`")
-    st.write(f"`{num_sweeps = }`")
-    st.write(f"`{sampler_name = }`")
-
     # if st.button("QUBO行列を作成する"):
     QUBO = make_random_qubo(N)
-    st.write(QUBO)
+
+    if st.sidebar.checkbox("パラメータを表示する", value=True):
+        st.write(f"`{N = }`")
+        st.write(f"`{num_reads = }`")
+        st.write(f"`{num_sweeps = }`")
+        st.write(f"`{sampler_name = }`")
+
+    if st.sidebar.checkbox("QUBO行列を表示する", value=True):
+        st.write(QUBO)
 
     if sampler_name == "ojsa":
         sampler = oj.SASampler()
@@ -90,19 +93,14 @@ def render_page():
     else:
         raise ValueError(f"Invalid sampler name: {sampler_name}")
 
-    if num_reads:
-        num_reads = int(num_reads)
-    if num_sweeps:
-        num_sweeps = int(num_sweeps)
+    start = time.time()
+    response = sampler.sample_qubo(QUBO, num_reads=num_reads, num_sweeps=num_sweeps)
+    elapsed_time = time.time() - start
 
-        start = time.time()
-        response = sampler.sample_ising(
-            QUBO, num_reads=num_reads, num_sweeps=num_sweeps
-        )
-        elapsed_time = time.time() - start
+    # st.write(type(response))
+    st.write(f"Elapsed time: {elapsed_time:.3f} [s]")
 
-        st.write(response)
-        st.write(f"Elapsed time: {elapsed_time:.3f} [s]")
+    st.write("`response.info =`", response.info)
 
 
 if __name__ == "__main__":
